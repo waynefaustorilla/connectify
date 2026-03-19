@@ -7,9 +7,8 @@ use App\Http\Requests\Post\PostRequest;
 use App\Services\Posts\PostService;
 
 class PostController extends Controller {
-  public function __construct(
-    protected PostService $postService,
-  ) {}
+  public function __construct(protected PostService $postService) {
+  }
 
   public function store(PostRequest $request) {
     $this->postService->createPost([
@@ -20,5 +19,15 @@ class PostController extends Controller {
     ]);
 
     return redirect()->route("home.index");
+  }
+
+  public function show(int $post) {
+    $post = $this->postService->getPostWithDetails($post);
+
+    if (!$post) {
+      abort(404);
+    }
+
+    return view('pages.posts.show')->with('post', $post);
   }
 }

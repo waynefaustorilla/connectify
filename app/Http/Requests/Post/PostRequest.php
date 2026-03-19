@@ -11,7 +11,7 @@ class PostRequest extends FormRequest {
    * Determine if the user is authorized to make this request.
    */
   public function authorize(): bool {
-    return Auth::check() && Auth::user()->hasVerifiedEmail();
+    return Auth::check();
   }
 
   /**

@@ -16,6 +16,10 @@ class DatabaseSeeder extends Seeder {
     $this->call([
       SexSeeder::class,
       CategorySeeder::class,
+      FriendshipStatusSeeder::class,
+      RelationshipStatusSeeder::class,
+      EducationLevelSeeder::class,
+      EmploymentTypeSeeder::class,
     ]);
   }
 }

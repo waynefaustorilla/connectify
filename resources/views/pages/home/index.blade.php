@@ -12,10 +12,10 @@
     </button>
 
     <div class="collapse navbar-collapse" id="navbarNav">
-      <form class="d-flex mx-auto my-2 my-lg-0" style="max-width: 420px; width: 100%;" role="search">
+      <form class="d-flex mx-auto my-2 my-lg-0" style="max-width: 420px; width: 100%;" role="search" action="{{ route('search') }}" method="GET">
         <div class="input-group">
           <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
-          <input class="form-control border-start-0" type="search" placeholder="Search people, posts..." aria-label="Search">
+          <input class="form-control border-start-0" type="search" name="q" placeholder="Search people, posts..." aria-label="Search">
         </div>
       </form>
 
@@ -25,26 +25,33 @@
         </li>
 
         <li class="nav-item">
-          <a class="nav-link" href="#"><i class="bi bi-people-fill me-1"></i>Friends</a>
+          <a class="nav-link" href="{{ route('friends.index') }}"><i class="bi bi-people-fill me-1"></i>Friends</a>
         </li>
 
         <li class="nav-item">
-          <a class="nav-link position-relative" href="#">
+          <a class="nav-link position-relative" href="{{ route('notifications.index') }}">
             <i class="bi bi-bell-fill"></i>
-            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: .6rem;">3</span>
+            @if($notificationUnreadCount > 0)
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: .6rem;">{{ $notificationUnreadCount > 99 ? '99+' : $notificationUnreadCount }}</span>
+            @endif
           </a>
         </li>
 
         <li class="nav-item dropdown ms-2">
           <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
-            <img src="https://ui-avatars.com/api/?name=John+Doe&background=fff&color=0d6efd&size=32&rounded=true&bold=true" alt="avatar" width="32" height="32" class="rounded-circle">
+            <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->firstname . ' ' . Auth::user()->lastname) }}&background=fff&color=0d6efd&size=32&rounded=true&bold=true" alt="avatar" width="32" height="32" class="rounded-circle">
           </a>
 
           <ul class="dropdown-menu dropdown-menu-end shadow">
-            <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
-            <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
+            <li><a class="dropdown-item" href="{{ route('profile.show', Auth::user()->username) }}"><i class="bi bi-person me-2"></i>Profile</a></li>
+            <li><a class="dropdown-item" href="{{ route('settings.index') }}"><i class="bi bi-gear me-2"></i>Settings</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item text-danger" href="#"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+            <li>
+              <form action="{{ route('auth.logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="dropdown-item text-danger"><i class="bi bi-box-arrow-right me-2"></i>Logout</button>
+              </form>
+            </li>
           </ul>
         </li>
       </ul>
@@ -58,25 +65,27 @@
       <div class="card shadow-sm border-0 mb-3 overflow-hidden">
         <div class="bg-primary" style="height: 60px;"></div>
         <div class="card-body text-center" style="margin-top: -35px;">
-          <img src="https://ui-avatars.com/api/?name=John+Doe&background=0d6efd&color=fff&size=70&rounded=true&bold=true" alt="avatar" width="70" height="70" class="rounded-circle border border-3 border-white shadow-sm">
-          <h6 class="mt-2 mb-0">John Doe</h6>
-          <small class="text-muted">@johndoe</small>
+          <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->firstname . ' ' . auth()->user()->lastname) }}&background=0d6efd&color=fff&size=70&rounded=true&bold=true" alt="avatar" width="70" height="70" class="rounded-circle border border-3 border-white shadow-sm">
+          <a href="{{ route('profile.show', auth()->user()->username) }}" class="text-decoration-none">
+            <h6 class="mt-2 mb-0">{{ auth()->user()->firstname }} {{ auth()->user()->lastname }}</h6>
+          </a>
+          <small class="text-muted">{{ '@' . auth()->user()->username }}</small>
 
           <hr>
 
           <div class="d-flex justify-content-around text-center">
             <div>
-              <div class="fw-bold">128</div>
-              <small class="text-muted">Posts</small>
+              <div class="fw-bold">{{ $postsCount }}</div>
+              <small class="text-muted">{{ Str::plural('Post', $postsCount) }}</small>
             </div>
 
             <div>
-              <div class="fw-bold">1.2k</div>
-              <small class="text-muted">Followers</small>
+              <div class="fw-bold">{{ $followersCount }}</div>
+              <small class="text-muted">{{ Str::plural('Follower', $followersCount) }}</small>
             </div>
 
             <div>
-              <div class="fw-bold">384</div>
+              <div class="fw-bold">{{ $followingCount }}</div>
               <small class="text-muted">Following</small>
             </div>
           </div>
@@ -115,10 +124,10 @@
         @csrf
         <div class="card-body">
           <div class="d-flex gap-3 align-items-start">
-            <img src="https://ui-avatars.com/api/?name=John+Doe&background=0d6efd&color=fff&size=42&rounded=true&bold=true" alt="avatar" width="42" height="42" class="rounded-circle">
+            <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->firstname . ' ' . auth()->user()->lastname) }}&background=0d6efd&color=fff&size=42&rounded=true&bold=true" alt="avatar" width="42" height="42" class="rounded-circle">
             <div class="flex-grow-1">
               <input type="text" name="title" class="form-control border-0 bg-light mb-2" placeholder="Title">
-              <textarea name="content" class="form-control border-0 bg-light" rows="2" placeholder="What's on your mind, John?" style="resize: none;"></textarea>
+              <textarea name="content" class="form-control border-0 bg-light" rows="2" placeholder="What's on your mind, {{ auth()->user()->firstname }}?" style="resize: none;"></textarea>
             </div>
           </div>
 
@@ -174,49 +183,14 @@
         @endforeach
       </div>
 
-      @php
-        $posts = [
-          [
-            'name' => 'Alice Johnson',
-            'handle' => '@alicej',
-            'time' => '2 hours ago',
-            'content' => "Just finished building my first Laravel app! \xF0\x9F\x9A\x80 The Eloquent ORM makes working with databases so elegant. Can't wait to share it with you all!",
-            'likes' => 42,
-            'comments' => 8,
-            'shares' => 3,
-            'color' => 'e91e63',
-          ],
-          [
-            'name' => 'Bob Martinez',
-            'handle' => '@bobm',
-            'time' => '4 hours ago',
-            'content' => "Beautiful sunset at the beach today \xF0\x9F\x8C\x85 Sometimes you just need to unplug and enjoy nature. Who else loves weekend getaways?",
-            'likes' => 127,
-            'comments' => 24,
-            'shares' => 11,
-            'color' => 'ff9800',
-          ],
-          [
-            'name' => 'Carol Williams',
-            'handle' => '@carolw',
-            'time' => '6 hours ago',
-            'content' => "Hot take: Tailwind CSS is great, but there's something satisfying about writing clean Bootstrap components. What's your go-to CSS framework? \xF0\x9F\x8E\xA8",
-            'likes' => 89,
-            'comments' => 45,
-            'shares' => 7,
-            'color' => '9c27b0',
-          ],
-        ];
-      @endphp
-
-      @foreach($posts as $post)
+      @forelse($posts as $post)
       <div class="card shadow-sm border-0 mb-3">
         <div class="card-body">
           <div class="d-flex align-items-center gap-3 mb-3">
-            <img src="https://ui-avatars.com/api/?name={{ urlencode($post['name']) }}&background={{ $post['color'] }}&color=fff&size=46&rounded=true&bold=true" alt="{{ $post['name'] }}" width="46" height="46" class="rounded-circle">
+            <img src="https://ui-avatars.com/api/?name={{ urlencode($post->user->firstname . ' ' . $post->user->lastname) }}&color=fff&size=46&rounded=true&bold=true" alt="{{ $post->user->firstname }} {{ $post->user->lastname }}" width="46" height="46" class="rounded-circle">
             <div class="flex-grow-1">
-              <h6 class="mb-0">{{ $post['name'] }}</h6>
-              <small class="text-muted">{{ $post['handle'] }} &middot; {{ $post['time'] }}</small>
+              <h6 class="mb-0">{{ $post->user->firstname }} {{ $post->user->lastname }}</h6>
+              <small class="text-muted">{{ '@' . $post->user->username }} &middot; {{ $post->created_at->diffForHumans() }}</small>
             </div>
             <div class="dropdown">
               <button class="btn btn-sm btn-light rounded-circle" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></button>
@@ -228,25 +202,97 @@
             </div>
           </div>
 
-          <p class="mb-3" style="line-height: 1.6;">{{ $post['content'] }}</p>
-          <div class="d-flex justify-content-between text-muted small border-top border-bottom py-2 mb-2">
-            <span><i class="bi bi-heart-fill text-danger me-1"></i>{{ $post['likes'] }} likes</span>
-            <span>{{ $post['comments'] }} comments &middot; {{ $post['shares'] }} shares</span>
-          </div>
-          <div class="d-flex justify-content-around">
-            <button class="btn btn-light btn-sm flex-fill me-1 d-flex align-items-center justify-content-center gap-1">
-              <i class="bi bi-heart"></i> Like
-            </button>
-            <button class="btn btn-light btn-sm flex-fill me-1 d-flex align-items-center justify-content-center gap-1">
-              <i class="bi bi-chat"></i> Comment
+          <h6 class="mb-2">{{ $post->title }}</h6>
+          <p class="mb-3" style="line-height: 1.6;">{{ $post->content }}</p>
+          <div class="d-flex justify-content-around border-top pt-2">
+            <form method="POST" action="{{ route('posts.like', $post) }}" class="flex-fill me-1">
+              @csrf
+              <button type="submit" class="btn btn-light btn-sm w-100 d-flex align-items-center justify-content-center gap-1 {{ $post->likes->contains('user_id', auth()->id()) ? 'text-danger' : '' }}">
+                <i class="bi {{ $post->likes->contains('user_id', auth()->id()) ? 'bi-heart-fill' : 'bi-heart' }}"></i>
+                {{ $post->likes_count }} {{ Str::plural('Like', $post->likes_count) }}
+              </button>
+            </form>
+            <button class="btn btn-light btn-sm flex-fill me-1 d-flex align-items-center justify-content-center gap-1" type="button" data-bs-toggle="collapse" data-bs-target="#comments-{{ $post->id }}">
+              <i class="bi bi-chat"></i> {{ $post->comments_count }} {{ Str::plural('Comment', $post->comments_count) }}
             </button>
             <button class="btn btn-light btn-sm flex-fill d-flex align-items-center justify-content-center gap-1">
               <i class="bi bi-share"></i> Share
             </button>
           </div>
+
+          <div class="collapse mt-3" id="comments-{{ $post->id }}">
+            <form method="POST" action="{{ route('comments.store', $post) }}" class="d-flex gap-2 mb-3">
+              @csrf
+              <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->firstname . ' ' . auth()->user()->lastname) }}&background=0d6efd&color=fff&size=36&rounded=true&bold=true" alt="avatar" width="36" height="36" class="rounded-circle">
+              <div class="flex-grow-1">
+                <input type="text" name="content" class="form-control form-control-sm bg-light" placeholder="Write a comment..." required maxlength="5000">
+              </div>
+              <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-send"></i></button>
+            </form>
+
+            @foreach($post->comments->whereNull('parent_id') as $comment)
+            <div class="d-flex gap-2 mb-2">
+              <img src="https://ui-avatars.com/api/?name={{ urlencode($comment->user->firstname . ' ' . $comment->user->lastname) }}&background=6c757d&color=fff&size=32&rounded=true&bold=true" alt="{{ $comment->user->firstname }}" width="32" height="32" class="rounded-circle">
+              <div class="flex-grow-1">
+                <div class="bg-light rounded-3 px-3 py-2">
+                  <a href="{{ route('profile.show', $comment->user->username) }}" class="fw-semibold text-decoration-none text-dark small">{{ $comment->user->firstname }} {{ $comment->user->lastname }}</a>
+                  <p class="mb-0 small">{{ $comment->content }}</p>
+                </div>
+                <small class="text-muted ms-2">{{ $comment->created_at->diffForHumans() }}</small>
+                <button type="button" class="btn btn-link btn-sm text-muted p-0 ms-2" data-bs-toggle="collapse" data-bs-target="#reply-form-{{ $comment->id }}"><small>Reply</small></button>
+                @if($comment->user_id === auth()->id())
+                <form method="POST" action="{{ route('comments.destroy', $comment) }}" class="d-inline">
+                  @csrf
+                  @method('DELETE')
+                  <button type="submit" class="btn btn-link btn-sm text-danger p-0 ms-2"><small>Delete</small></button>
+                </form>
+                @endif
+
+                <div class="collapse mt-2" id="reply-form-{{ $comment->id }}">
+                  <form method="POST" action="{{ route('comments.store', $post) }}" class="d-flex gap-2">
+                    @csrf
+                    <input type="hidden" name="parent_id" value="{{ $comment->id }}">
+                    <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->firstname . ' ' . auth()->user()->lastname) }}&background=0d6efd&color=fff&size=28&rounded=true&bold=true" alt="avatar" width="28" height="28" class="rounded-circle">
+                    <div class="flex-grow-1">
+                      <input type="text" name="content" class="form-control form-control-sm bg-light" placeholder="Write a reply..." required maxlength="5000">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-send"></i></button>
+                  </form>
+                </div>
+
+                @foreach($comment->replies as $reply)
+                <div class="d-flex gap-2 mt-2 ms-2">
+                  <img src="https://ui-avatars.com/api/?name={{ urlencode($reply->user->firstname . ' ' . $reply->user->lastname) }}&background=adb5bd&color=fff&size=28&rounded=true&bold=true" alt="{{ $reply->user->firstname }}" width="28" height="28" class="rounded-circle">
+                  <div class="flex-grow-1">
+                    <div class="bg-light rounded-3 px-3 py-2">
+                      <a href="{{ route('profile.show', $reply->user->username) }}" class="fw-semibold text-decoration-none text-dark small">{{ $reply->user->firstname }} {{ $reply->user->lastname }}</a>
+                      <p class="mb-0 small">{{ $reply->content }}</p>
+                    </div>
+                    <small class="text-muted ms-2">{{ $reply->created_at->diffForHumans() }}</small>
+                    @if($reply->user_id === auth()->id())
+                    <form method="POST" action="{{ route('comments.destroy', $reply) }}" class="d-inline">
+                      @csrf
+                      @method('DELETE')
+                      <button type="submit" class="btn btn-link btn-sm text-danger p-0 ms-2"><small>Delete</small></button>
+                    </form>
+                    @endif
+                  </div>
+                </div>
+                @endforeach
+              </div>
+            </div>
+            @endforeach
+          </div>
         </div>
       </div>
-      @endforeach
+      @empty
+      <div class="card shadow-sm border-0 mb-3">
+        <div class="card-body text-center text-muted py-4">
+          <i class="bi bi-chat-square-text fs-1 mb-2 d-block"></i>
+          <p class="mb-0">No posts yet. Be the first to share something!</p>
+        </div>
+      </div>
+      @endforelse
 
     </div>
 

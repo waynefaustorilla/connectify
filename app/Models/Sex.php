@@ -6,4 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Sex extends Model {
   public $timestamps = false;
+
+  public function getAllSexes() {
+    return $this->all();
+  }
 }

@@ -7,9 +7,8 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Services\Auth\AuthService;
 
 class LoginController extends Controller {
-  public function __construct(
-    protected AuthService $authService,
-  ) {}
+  public function __construct(protected AuthService $authService) {
+  }
 
   public function show_login_form() {
     return view("pages.auth.login");
