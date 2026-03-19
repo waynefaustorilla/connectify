@@ -15,7 +15,7 @@
 </head>
 
 <body>
-  <h1>Hello Nigga</h1>
+  <h1>Hello Master</h1>
 </body>
 
 </html>
